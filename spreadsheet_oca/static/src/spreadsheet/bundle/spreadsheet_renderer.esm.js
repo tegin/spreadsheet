@@ -14,12 +14,12 @@ const {useSubEnv, onWillStart} = owl;
 const uuidGenerator = new spreadsheet.helpers.UuidGenerator();
 
 class SpreadsheetTransportService {
-    constructor(orm, bus_service, model, res_id) {
+    constructor(orm, bus_service, model, res_id, access_token) {
         this.orm = orm;
         this.bus_service = bus_service;
         this.model = model;
         this.res_id = res_id;
-        this.channel = "spreadsheet_oca;" + this.model + ";" + this.res_id;
+        this.channel = "spreadsheet_oca;" + this.model + ";" + access_token;
         this.bus_service.addChannel(this.channel);
         this.bus_service.addEventListener(
             "notification",
@@ -66,7 +66,8 @@ export class SpreadsheetRenderer extends Component {
                     this.orm,
                     this.bus_service,
                     this.props.model,
-                    this.props.res_id
+                    this.props.res_id,
+                    this.props.record.access_token
                 ),
                 client: {
                     id: uuidGenerator.uuidv4(),

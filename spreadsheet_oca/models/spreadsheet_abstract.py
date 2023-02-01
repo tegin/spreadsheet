@@ -2,6 +2,7 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 import json
+import uuid
 
 from odoo import fields, models
 from odoo.exceptions import AccessError
@@ -12,6 +13,7 @@ class SpreadsheetAbstract(models.AbstractModel):
     _description = "Spreadsheet abstract for inheritance"
 
     name = fields.Char(required=True)
+    access_token = fields.Char(required=True, default=lambda r: uuid.uuid4())
     spreadsheet_raw = fields.Serialized()
     spreadsheet_revision_ids = fields.One2many(
         "spreadsheet.oca.revision",
@@ -29,6 +31,7 @@ class SpreadsheetAbstract(models.AbstractModel):
             mode = "readonly"
         return {
             "name": self.name,
+            "access_token": self.access_token,
             "spreadsheet_raw": self.spreadsheet_raw,
             "revisions": [
                 {
@@ -53,7 +56,7 @@ class SpreadsheetAbstract(models.AbstractModel):
 
     def send_spreadsheet_message(self, message):
         self.ensure_one()
-        channel = "spreadsheet_oca;%s;%s" % (self._name, self.id)
+        channel = "spreadsheet_oca;%s;%s" % (self._name, self.access_token)
         message.update({"res_model": self._name, "res_id": self.id})
         if message["type"] in ["REVISION_UNDONE", "REMOTE_REVISION", "REVISION_REDONE"]:
             self.env["spreadsheet.oca.revision"].create(
