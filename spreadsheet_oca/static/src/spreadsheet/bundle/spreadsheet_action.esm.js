@@ -91,18 +91,13 @@ export class ActionSpreadsheetOca extends Component {
     }
     async importDataPivot(spreadsheet_model) {
         var sheetId = spreadsheet_model.getters.getActiveSheetId();
+        var row = 0;
         if (this.import_data.new === undefined) {
-            sheetId = uuidGenerator.uuidv4();
-            spreadsheet_model.dispatch("CREATE_SHEET", {
-                sheetId,
-                position: spreadsheet_model.getters.getSheetIds().length,
-            });
-            // We want to open the new sheet
-            const sheetIdFrom = spreadsheet_model.getters.getActiveSheetId();
-            spreadsheet_model.dispatch("ACTIVATE_SHEET", {
-                sheetIdFrom,
-                sheetIdTo: sheetId,
-            });
+            row = spreadsheet_model.getters.getNumberRows(sheetId) + 1;
+            console.log(
+                spreadsheet_model.getters.getSheetViewVisibleRows().length,
+                row
+            );
         }
         const dataSourceId = uuidGenerator.uuidv4();
         const pivot_info = {
@@ -126,10 +121,11 @@ export class ActionSpreadsheetOca extends Component {
             rows,
             measures,
         };
+        console.log(row);
         spreadsheet_model.dispatch("INSERT_PIVOT", {
             sheetId,
             col: 0,
-            row: 0,
+            row: row,
             id: spreadsheet_model.getters.getNextPivotId(),
             table,
             dataSourceId,
