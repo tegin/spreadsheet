@@ -93,11 +93,27 @@ export class ActionSpreadsheetOca extends Component {
         var sheetId = spreadsheet_model.getters.getActiveSheetId();
         var row = 0;
         if (this.import_data.new === undefined) {
-            row = spreadsheet_model.getters.getNumberRows(sheetId) + 1;
-            console.log(
-                spreadsheet_model.getters.getSheetViewVisibleRows().length,
-                row
-            );
+            row = spreadsheet_model.getters.getNumberRows(sheetId);
+            var maxcols = spreadsheet_model.getters.getNumberCols(sheetId);
+            var filled = false;
+            while (row >= 0) {
+                for (var col = maxcols; col >= 0; col--) {
+                    console.log(spreadsheet_model.getters.getCell(sheetId, col, row));
+                    if (
+                        spreadsheet_model.getters.getCell(sheetId, col, row) !==
+                            undefined &&
+                        !spreadsheet_model.getters.getCell(sheetId, col, row).isEmpty()
+                    ) {
+                        filled = true;
+                        break;
+                    }
+                }
+                if (filled) {
+                    break;
+                }
+                row -= 1;
+            }
+            row += 1;
         }
         const dataSourceId = uuidGenerator.uuidv4();
         const pivot_info = {
@@ -121,7 +137,6 @@ export class ActionSpreadsheetOca extends Component {
             rows,
             measures,
         };
-        console.log(row);
         spreadsheet_model.dispatch("INSERT_PIVOT", {
             sheetId,
             col: 0,
